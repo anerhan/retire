@@ -19,7 +19,7 @@ module Tire
       @response.success?
 
     ensure
-      curl = %Q|curl -I "#{url}"|
+      curl = %Q|curl -I "#{url}" #{Configuration.curl_headers}|
       logged('HEAD', curl)
     end
 
@@ -28,17 +28,17 @@ module Tire
       @response.success?
 
     ensure
-      curl = %Q|curl -X DELETE #{url}|
+      curl = %Q|curl -X DELETE #{url} #{Configuration.curl_headers}|
       logged('DELETE', curl)
     end
 
     def create(options={})
       @options = options
-      @response = Configuration.client.post url, MultiJson.encode(options)
+      @response = Configuration.client.put url, MultiJson.encode(options)
       @response.success? ? @response : false
 
     ensure
-      curl = %Q|curl -X POST #{url} -d '#{MultiJson.encode(options, :pretty => Configuration.pretty)}'|
+      curl = %Q|curl -X POST #{url} -d '#{MultiJson.encode(options, :pretty => Configuration.pretty)}' #{Configuration.curl_headers}|
       logged('CREATE', curl)
     end
 

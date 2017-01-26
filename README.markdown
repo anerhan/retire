@@ -5,15 +5,17 @@ Tire
 
   NOTICE: This library has been renamed and retired in September 2013
           ([read the explanation](https://github.com/karmi/retire/wiki/Tire-Retire)).
-          It is not considered compatible with Elasticsearch 1.x.
+          It is not considered compatible with Elasticsearch 5.x.
 
   Have a look at the **<http://github.com/elasticsearch/elasticsearch-rails>** suite of gems,
   which contain similar set of features for ActiveModel/Record and Rails integration as Tire.
 
 ---------------------------------------------------------------------------------------------------
 
-_Tire_ is a Ruby (1.8 or 1.9) client for the [Elasticsearch](http://www.elasticsearch.org/)
+_Tire_ is a Ruby (1.8 or 1.9 or 2.2.2 ~>) client for the [Elasticsearch](http://www.elasticsearch.org/)
 search engine/database.
+
+Supported Kibana with X-Pack
 
 _Elasticsearch_ is a scalable, distributed, cloud-ready, highly-available,
 full-text search engine and database with
@@ -29,21 +31,37 @@ Installation
 
 OK. First, you need a running _Elasticsearch_ server. Thankfully, it's easy. Let's define easy:
 
-    $ curl -k -L -o elasticsearch-0.20.6.tar.gz http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.6.tar.gz
-    $ tar -zxvf elasticsearch-0.20.6.tar.gz
-    $ ./elasticsearch-0.20.6/bin/elasticsearch -f
+    $ curl -k -L -o elasticsearch-5.1.2.tar.gz http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-5.1.2.tar.gz
+    $ tar -zxvf elasticsearch-5.1.2.tar.gz
+    $ ./elasticsearch-5.1.2/bin/elasticsearch -f
 
 See, easy. On a Mac, you can also use _Homebrew_:
 
     $ brew install elasticsearch
 
+Install [Kibana](https://www.elastic.co/guide/en/kibana/current/targz.html) with [X-Pack](https://www.elastic.co/downloads/x-pack)
+```
+wget https://artifacts.elastic.co/downloads/kibana/kibana-5.1.2-darwin-x86_64.tar.gz
+mv kibana-5.1.2-darwin-x86_64 /usr/local/Cellar/elasticsearch/kibana
+ln -nfs /usr/local/Cellar/elasticsearch/kibana/bin/kibana-plugin /usr/local/bin/kibana-plugin
+ln -nfs /usr/local/Cellar/elasticsearch/kibana/bin/kibana /usr/local/bin/kibana 
+
+elasticsearch-plugin install x-pack
+kibana-plugin install x-pack
+
+kill-all elasticsearch && elasticsearch -d
+```
 Now, let's install the gem via Rubygems:
 
-    $ gem install tire
+```
+# Add to Gemfile
+gem 'tire', git: 'git@github.com:anerhan/retire.git', branch: '5.1-headers-support'
+bundle install
+```    
 
 Of course, you can install it from the source as well:
 
-    $ git clone git://github.com/karmi/tire.git
+    $ git clone git@github.com:anerhan/retire.git
     $ cd tire
     $ rake install
 
@@ -73,6 +91,25 @@ which allows you to use your preferred JSON library. We'll use the
 ```ruby
     require 'yajl/json_gem'
 ```
+
+Configuration for using headers(Sinatra example):
+```
+
+Tire.configure do
+  if [:development].include?(Sinatra::Application.environment)
+    logger STDERR, level: 'debug'
+  else
+    logger File.join(Sinatra::Application.settings.root, 'log/elasticsearch.log')
+  end
+
+  url('http://user_login:user_password@127.0.0.1:9200')
+  url_attrs = 'http://user_login:user_password@127.0.0.1:9200'.scan(/^(.*):\/\/(.*):(.*)@(.*)$/).flatten
+  headers({
+    'Authorization' => " Basic #{Base64.strict_encode64("#{url_attrs[1]}:#{url_attrs[2]}")}"
+  })
+end
+```
+
 
 Let's create an index named `articles` and store/index some documents:
 
