@@ -2,6 +2,14 @@ module Tire
 
   class Configuration
 
+    def self.headers(value=nil)
+      @headers = @headers || value
+    end
+
+    def self.curl_headers(value=nil)
+      @curl_headers =  @curl_headers || (headers ? headers.map{|k, v| "-H '#{k}:#{v}'"}.join(' ') : nil)
+    end
+
     def self.url(value=nil)
       @url = (value ? value.to_s.gsub(%r|/*$|, '') : nil) || @url || ENV['ELASTICSEARCH_URL'] || "http://localhost:9200"
     end
@@ -32,7 +40,5 @@ module Tire
                                                                  properties.map         { |p| "@#{p}" }
       reset_variables.each { |v| instance_variable_set(v.to_sym, nil) }
     end
-
   end
-
 end
