@@ -8,7 +8,7 @@ module Tire
         ConnectionExceptions = [::RestClient::ServerBrokeConnection, ::RestClient::RequestTimeout]
 
         def self.get(url, data=nil)
-          perform ::RestClient::Request.new(:method => :get, :url => url, :payload => data).execute
+          perform ::RestClient::Request.new(:method => :get, :url => url, :payload => data, headers: Configuration.headers).execute
         rescue *ConnectionExceptions
           raise
         rescue ::RestClient::Exception => e
