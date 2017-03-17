@@ -6,6 +6,14 @@ module Tire
       @headers = @headers || value
     end
 
+    def self.user(value=nil)
+      @user = @user || value
+    end
+
+    def self.password(value=nil)
+      @password = @password || value
+    end
+
     def self.curl_headers(value=nil)
       @curl_headers =  @curl_headers || (headers ? headers.map{|k, v| "-H '#{k}:#{v}'"}.join(' ') : nil)
     end
